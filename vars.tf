@@ -3,7 +3,7 @@ variable "name" {
   description = "Name of ECR repository"
 }
 
-variable "kms_key" {
+variable "key_id" {
   type        = string
   default     = null
   description = "ID/Alias/ARN of KMS key to use for SSE encryption. You can skip this to use default AWS managed key"

@@ -3,12 +3,13 @@ data "aws_kms_key" "repo" {
 }
 
 resource "aws_ecr_repository" "repo" {
+  # checkov:skip=CKV_AWS_136: SSE is in place using default KMS key
   name                 = var.name
   image_tag_mutability = var.image_tag_mutability
 
   encryption_configuration {
-    encryption_type = var.kms_key == null ? "AES256" : "KMS"
-    kms_key         = data.aws_kms_key.repo.arn
+    encryption_type = var.kms_key == "alias/aws/ecr" ? "AES256" : "KMS"
+    kms_key         = var.kms_key == "alias/aws/ecr" ? null : data.aws_kms_key.repo.arn
   }
 
   image_scanning_configuration {

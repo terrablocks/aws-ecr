@@ -29,7 +29,7 @@ module "ecr" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | name | Name of ECR repository | `string` | n/a | yes |
-| kms_key | ID/Alias/ARN of KMS key to use for SSE encryption. You can skip this to use default AWS managed key | `string` | `null` | no |
+| kms_key | ID/Alias/ARN of KMS key to use for SSE encryption. You can skip this to use default AWS managed key | `string` | `"alias/aws/ecr"` | no |
 | image_tag_mutability | Whether to allow image overwrite | `string` | `"IMMUTABLE"` | no |
 | scan_image_on_push | Enable scanning of container image for vulnerabilities on push | `bool` | `true` | no |
 | external_principals | Map of external AWS principals if you want to provide access to other AWS accounts | `map(string)` | `{}` | no |

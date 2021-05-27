@@ -5,7 +5,7 @@ variable "name" {
 
 variable "kms_key" {
   type        = string
-  default     = null
+  default     = "alias/aws/ecr"
   description = "ID/Alias/ARN of KMS key to use for SSE encryption. You can skip this to use default AWS managed key"
 }
 

@@ -21,22 +21,22 @@ variable "scan_image_on_push" {
   description = "Enable scanning of container image for vulnerabilities on push"
 }
 
-variable "external_principals" {
-  type        = map(string)
-  default     = {}
-  description = "Map of external AWS principals if you want to provide access to other AWS accounts"
+variable "ecr_resource_policy" {
+  type        = string
+  default     = ""
+  description = "To attach a resource policy to ECR repository provide a JSON formatted policy document. Refer to [AWS doc](https://docs.aws.amazon.com/AmazonECR/latest/userguide/repository-policy-examples.html) for creating the policy document"
 }
 
-variable "delete_after_days" {
-  type        = number
-  default     = 0
-  description = "Creates a lifecycle policy to delete container image after X days. **Note:** Either `delete_after_days` or `delete_after_count` has to be provided"
+variable "apply_default_lifecycle_policy" {
+  type        = bool
+  default     = true
+  description = "Whether to create a lifecycle policy to delete container image after 30 days. Set this to false if you are passing custom policy"
 }
 
-variable "delete_after_count" {
-  type        = number
-  default     = 0
-  description = "Creates a lifecycle policy to delete container images after a count has reached. **Note:** Either `delete_after_days` or `delete_after_count` has to be provided"
+variable "custom_lifecycle_policy" {
+  type        = string
+  default     = ""
+  description = "Pass a custom JSON formatted string policy document. Refer to [AWS doc](https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html#lifecycle_policy_parameters) for creating the policy document"
 }
 
 variable "tags" {

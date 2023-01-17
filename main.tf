@@ -19,75 +19,35 @@ resource "aws_ecr_repository" "repo" {
   tags = var.tags
 }
 
-resource "aws_ecr_repository_policy" "repo" {
-  count      = min(length(var.external_principals), 1)
+resource "aws_ecr_repository_policy" "this" {
+  count      = var.ecr_resource_policy != "" ? 1 : 0
   repository = aws_ecr_repository.repo.name
-
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "Allow other accounts belonging to the organisation to pull the image",
-      "Effect": "Allow",
-      "Principal": ${var.external_principals},
-      "Action": [
-        "ecr:BatchCheckLayerAvailability",
-        "ecr:BatchGetImage",
-        "ecr:GetDownloadUrlForLayer",
-        "ecr:GetAuthorizationToken"
-      ]
-    }
-  ]
-}
-EOF
+  policy     = var.ecr_resource_policy
 }
 
-resource "aws_ecr_lifecycle_policy" "days" {
-  count      = min(var.delete_after_days, 1)
-  repository = aws_ecr_repository.repo.name
-
-  policy = <<EOF
+locals {
+  default_lifecycle_rule = <<EOF
 {
   "rules": [
     {
       "rulePriority": 1,
-      "description": "Expire images older than ${var.delete_after_days} days",
-      "selection": {
-        "tagStatus": "any",
-        "countType": "sinceImagePushed",
-        "countUnit": "days",
-        "countNumber": ${var.delete_after_days}
-      },
-      "action": {
-          "type": "expire"
-      }
-    }
-  ]
-}
-EOF
-}
-
-resource "aws_ecr_lifecycle_policy" "count" {
-  count      = min(var.delete_after_count, 1)
-  repository = aws_ecr_repository.repo.name
-
-  policy = <<EOF
-{
-  "rules": [
-    {
-      "rulePriority": 1,
-      "description": "Keep last ${var.delete_after_count} images",
+      "description": "Keep last 30 images",
       "selection": {
         "tagStatus": "any",
         "countType": "imageCountMoreThan",
-        "countNumber": ${var.delete_after_count}
+        "countNumber": 30
       },
       "action": {
-          "type": "expire"
+        "type": "expire"
       }
     }
   ]
 }
 EOF
+}
+
+resource "aws_ecr_lifecycle_policy" "this" {
+  count      = var.apply_default_lifecycle_policy || var.custom_lifecycle_policy != "" ? 1 : 0
+  repository = aws_ecr_repository.repo.name
+  policy     = var.apply_default_lifecycle_policy ? local.default_lifecycle_rule : var.custom_lifecycle_policy
 }

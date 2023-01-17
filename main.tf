@@ -45,53 +45,41 @@ EOF
 
 locals {
   high_priority = var.delete_after_count > 0 && var.delete_after_days > 0 && var.high_priority != "" ? var.high_priority : (var.delete_after_days > 0 ? "days" : "count")
+  days_rule = {
+    rulePriority = local.high_priority == "days" ? 1 : 2,
+    description  = "Expire images older than ${var.delete_after_days} day(s)",
+    selection = {
+      tagStatus   = "any",
+      countType   = "sinceImagePushed",
+      countUnit   = "days",
+      countNumber = var.delete_after_days
+    },
+    action = {
+      type = "expire"
+    }
+  }
+  count_rule = {
+    rulePriority = local.high_priority == "count" ? 1 : 2,
+    description  = "Keep last ${var.delete_after_count} image(s)",
+    selection = {
+      tagStatus   = "any",
+      countType   = "imageCountMoreThan",
+      countNumber = var.delete_after_count
+    },
+    action = {
+      type = "expire"
+    }
+  }
+  lifecycle_policy_rules = var.delete_after_count > 0 && var.delete_after_days > 0 ? [local.days_rule, local.count_rule] : (var.delete_after_days > 0 ? [local.days_rule] : [local.count_rule])
 }
 
-resource "aws_ecr_lifecycle_policy" "days" {
-  count      = min(var.delete_after_days, 1)
+resource "aws_ecr_lifecycle_policy" "this" {
+  count      = var.delete_after_days > 0 || var.delete_after_count > 0 ? 1 : 0
   repository = aws_ecr_repository.repo.name
 
-  policy = <<EOF
-{
-  "rules": [
+  policy = jsonencode(
     {
-      "rulePriority": ${local.high_priority == "days" ? 1 : 2},
-      "description": "Expire images older than ${var.delete_after_days} days",
-      "selection": {
-        "tagStatus": "any",
-        "countType": "sinceImagePushed",
-        "countUnit": "days",
-        "countNumber": ${var.delete_after_days}
-      },
-      "action": {
-          "type": "expire"
-      }
+      rules = local.lifecycle_policy_rules
     }
-  ]
-}
-EOF
-}
-
-resource "aws_ecr_lifecycle_policy" "count" {
-  count      = min(var.delete_after_count, 1)
-  repository = aws_ecr_repository.repo.name
-
-  policy = <<EOF
-{
-  "rules": [
-    {
-      "rulePriority": ${local.high_priority == "count" ? 1 : 2},
-      "description": "Keep last ${var.delete_after_count} images",
-      "selection": {
-        "tagStatus": "any",
-        "countType": "imageCountMoreThan",
-        "countNumber": ${var.delete_after_count}
-      },
-      "action": {
-          "type": "expire"
-      }
-    }
-  ]
-}
-EOF
+  )
 }

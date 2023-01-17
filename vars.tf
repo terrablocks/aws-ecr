@@ -30,13 +30,19 @@ variable "external_principals" {
 variable "delete_after_days" {
   type        = number
   default     = 0
-  description = "Creates a lifecycle policy to delete container image after X days. **Note:** Either `delete_after_days` or `delete_after_count` has to be provided"
+  description = "Creates a lifecycle policy to delete container image after X days. **Note:** Leave it as 0 if you don't want to create the policy"
 }
 
 variable "delete_after_count" {
   type        = number
   default     = 0
-  description = "Creates a lifecycle policy to delete container images after a count has reached. **Note:** Either `delete_after_days` or `delete_after_count` has to be provided"
+  description = "Creates a lifecycle policy to delete container images after a count has reached. **Note:** Leave it as 0 if you don't want to create the policy"
+}
+
+variable "high_priority" {
+  type        = string
+  default     = ""
+  description = "Used to assign priority to lifecycle rules only when both days and count lifecycle policy needs to be created. **Valid values:** days, count"
 }
 
 variable "tags" {

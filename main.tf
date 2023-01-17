@@ -28,7 +28,7 @@ resource "aws_ecr_repository_policy" "repo" {
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "Allow other accounts belonging to the organisation to pull the image",
+      "Sid": "Allow other accounts to pull the image",
       "Effect": "Allow",
       "Principal": ${var.external_principals},
       "Action": [
@@ -43,6 +43,10 @@ resource "aws_ecr_repository_policy" "repo" {
 EOF
 }
 
+locals {
+  high_priority = var.delete_after_count > 0 && var.delete_after_days > 0 && var.high_priority != "" ? var.high_priority : (var.delete_after_days > 0 ? "days" : "count")
+}
+
 resource "aws_ecr_lifecycle_policy" "days" {
   count      = min(var.delete_after_days, 1)
   repository = aws_ecr_repository.repo.name
@@ -51,7 +55,7 @@ resource "aws_ecr_lifecycle_policy" "days" {
 {
   "rules": [
     {
-      "rulePriority": 1,
+      "rulePriority": ${local.high_priority == "days" ? 1 : 2},
       "description": "Expire images older than ${var.delete_after_days} days",
       "selection": {
         "tagStatus": "any",
@@ -76,7 +80,7 @@ resource "aws_ecr_lifecycle_policy" "count" {
 {
   "rules": [
     {
-      "rulePriority": 1,
+      "rulePriority": ${local.high_priority == "count" ? 1 : 2},
       "description": "Keep last ${var.delete_after_count} images",
       "selection": {
         "tagStatus": "any",

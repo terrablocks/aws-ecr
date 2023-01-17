@@ -21,8 +21,8 @@ module "ecr" {
 
 | Name | Version |
 |------|---------|
-| terraform | >= 0.13 |
-| aws | >= 3.37.0 |
+| terraform | >= 1.0 |
+| aws | >= 4.0.0 |
 
 ## Inputs
 
@@ -32,10 +32,9 @@ module "ecr" {
 | kms_key | ID/Alias/ARN of KMS key to use for SSE encryption. You can skip this to use default AWS managed key | `string` | `"alias/aws/ecr"` | no |
 | image_tag_mutability | Whether to allow image overwrite | `string` | `"IMMUTABLE"` | no |
 | scan_image_on_push | Enable scanning of container image for vulnerabilities on push | `bool` | `true` | no |
-| external_principals | Map of external AWS principals if you want to provide access to other AWS accounts | `map(string)` | `{}` | no |
-| delete_after_days | Creates a lifecycle policy to delete container image after X days. **Note:** Leave it as 0 if you don't want to create the policy | `number` | `0` | no |
-| delete_after_count | Creates a lifecycle policy to delete container images after a count has reached. **Note:** Leave it as 0 if you don't want to create the policy | `number` | `0` | no |
-| high_priority | Used to assign priority to lifecycle rules only when both days and count lifecycle policy needs to be created. **Valid values:** days, count | `string` | `""` | no |
+| ecr_resource_policy | To attach a resource policy to ECR repository provide a JSON formatted policy document. Refer to [AWS doc](https://docs.aws.amazon.com/AmazonECR/latest/userguide/repository-policy-examples.html) for creating the policy document | `string` | `""` | no |
+| apply_default_lifecycle_policy | Whether to create a lifecycle policy to delete container image after 30 days. Set this to false if you are passing custom policy | `bool` | `true` | no |
+| custom_lifecycle_policy | Pass a custom JSON formatted string policy document. Refer to [AWS doc](https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html#lifecycle_policy_parameters) for creating the policy document | `string` | `""` | no |
 | tags | Map of key value pair to associate with ECR repo | `map(string)` | `{}` | no |
 
 ## Outputs

@@ -19,67 +19,35 @@ resource "aws_ecr_repository" "repo" {
   tags = var.tags
 }
 
-resource "aws_ecr_repository_policy" "repo" {
-  count      = min(length(var.external_principals), 1)
+resource "aws_ecr_repository_policy" "this" {
+  count      = var.ecr_resource_policy != "" ? 1 : 0
   repository = aws_ecr_repository.repo.name
+  policy     = var.ecr_resource_policy
+}
 
-  policy = <<EOF
+locals {
+  default_lifecycle_rule = <<EOF
 {
-  "Version": "2012-10-17",
-  "Statement": [
+  "rules": [
     {
-      "Sid": "Allow other accounts to pull the image",
-      "Effect": "Allow",
-      "Principal": ${var.external_principals},
-      "Action": [
-        "ecr:BatchCheckLayerAvailability",
-        "ecr:BatchGetImage",
-        "ecr:GetDownloadUrlForLayer",
-        "ecr:GetAuthorizationToken"
-      ]
+      "rulePriority": 1,
+      "description": "Keep last 30 images",
+      "selection": {
+        "tagStatus": "any",
+        "countType": "imageCountMoreThan",
+        "countNumber": 30
+      },
+      "action": {
+        "type": "expire"
+      }
     }
   ]
 }
 EOF
 }
 
-locals {
-  high_priority = var.delete_after_count > 0 && var.delete_after_days > 0 && var.high_priority != "" ? var.high_priority : (var.delete_after_days > 0 ? "days" : "count")
-  days_rule = {
-    rulePriority = local.high_priority == "days" ? 1 : 2,
-    description  = "Expire images older than ${var.delete_after_days} day(s)",
-    selection = {
-      tagStatus   = "any",
-      countType   = "sinceImagePushed",
-      countUnit   = "days",
-      countNumber = var.delete_after_days
-    },
-    action = {
-      type = "expire"
-    }
-  }
-  count_rule = {
-    rulePriority = local.high_priority == "count" ? 1 : 2,
-    description  = "Keep last ${var.delete_after_count} image(s)",
-    selection = {
-      tagStatus   = "any",
-      countType   = "imageCountMoreThan",
-      countNumber = var.delete_after_count
-    },
-    action = {
-      type = "expire"
-    }
-  }
-  lifecycle_policy_rules = var.delete_after_count > 0 && var.delete_after_days > 0 ? [local.days_rule, local.count_rule] : (var.delete_after_days > 0 ? [local.days_rule] : [local.count_rule])
-}
-
 resource "aws_ecr_lifecycle_policy" "this" {
-  count      = var.delete_after_days > 0 || var.delete_after_count > 0 ? 1 : 0
+  count      = var.apply_default_lifecycle_policy || var.custom_lifecycle_policy != "" ? 1 : 0
   repository = aws_ecr_repository.repo.name
-
-  policy = jsonencode(
-    {
-      rules = local.lifecycle_policy_rules
-    }
-  )
+  policy     = var.apply_default_lifecycle_policy ? local.default_lifecycle_rule : var.custom_lifecycle_policy
 }

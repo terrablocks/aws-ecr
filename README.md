@@ -1,6 +1,6 @@
 # Create an ECR repository
 
-![License](https://img.shields.io/github/license/terrablocks/aws-ecr?style=for-the-badge) ![Tests](https://img.shields.io/github/actions/workflow/status/terrablocks/aws-ecr/tests.yml?branch=main&label=Test&style=for-the-badge) ![Checkov](https://img.shields.io/github/actions/workflow/status/terrablocks/aws-ecr/checkov.yml?branch=main&label=Test&style=for-the-badge) ![Commit](https://img.shields.io/github/last-commit/terrablocks/aws-ecr?style=for-the-badge) ![Release](https://img.shields.io/github/v/release/terrablocks/aws-ecr?style=for-the-badge)
+![License](https://img.shields.io/github/license/terrablocks/aws-ecr?style=for-the-badge) ![Tests](https://img.shields.io/github/actions/workflow/status/terrablocks/aws-ecr/tests.yml?branch=main&label=Test&style=for-the-badge) ![Checkov](https://img.shields.io/github/actions/workflow/status/terrablocks/aws-ecr/checkov.yml?branch=main&label=Checkov&style=for-the-badge) ![Commit](https://img.shields.io/github/last-commit/terrablocks/aws-ecr?style=for-the-badge) ![Release](https://img.shields.io/github/v/release/terrablocks/aws-ecr?style=for-the-badge)
 
 This terraform module will deploy the following services:
 - ECR Repository

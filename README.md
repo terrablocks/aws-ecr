@@ -23,7 +23,7 @@ module "ecr" {
 | Name | Version |
 |------|---------|
 | terraform | >= 1.0 |
-| aws | >= 4.0.0 |
+| aws | >= 5.82.2 |
 
 ## Inputs
 

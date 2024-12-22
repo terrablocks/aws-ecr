@@ -9,6 +9,12 @@ variable "kms_key" {
   description = "ID/Alias/ARN of KMS key to use for SSE encryption. You can skip this to use default AWS managed key"
 }
 
+variable "force_delete" {
+  type        = bool
+  default     = true
+  description = "Delete the ECR repository even if it contains images"
+}
+
 variable "image_tag_mutability" {
   type        = string
   default     = "IMMUTABLE"

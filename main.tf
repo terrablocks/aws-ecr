@@ -5,6 +5,7 @@ data "aws_kms_key" "repo" {
 resource "aws_ecr_repository" "repo" {
   # checkov:skip=CKV_AWS_136: SSE is in place using default KMS key
   name                 = var.name
+  force_delete         = var.force_delete
   image_tag_mutability = var.image_tag_mutability
 
   encryption_configuration {
